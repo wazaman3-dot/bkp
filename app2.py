@@ -37,14 +37,41 @@ st.markdown(f"""
 /* ============================================= */
 
 .kpi-row-container {{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.8rem;
     margin: 1.5rem 0 2rem 0;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: thin;
     width: 100%;
 }}
 
+.kpi-row-container::-webkit-scrollbar {{
+    height: 6px;
+}}
+
+.kpi-row-container::-webkit-scrollbar-track {{
+    background: #f1f1f1;
+    border-radius: 3px;
+}}
+
+.kpi-row-container::-webkit-scrollbar-thumb {{
+    background: #888;
+    border-radius: 3px;
+}}
+
+.kpi-row-container::-webkit-scrollbar-thumb:hover {{
+    background: #555;
+}}
+
 .kpi-item {{
+    flex: 0 0 auto;
+    min-width: 165px;
+    max-width: 180px;
     background: white;
     padding: 1rem;
     border-radius: 8px;
@@ -53,7 +80,7 @@ st.markdown(f"""
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     transition: all 0.3s ease;
     border-top: 4px solid;
-    height: 100%;
+    height: 110px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -351,17 +378,9 @@ h3 {{
 /* RESPONSIVE DESIGN                             */
 /* ============================================= */
 
-/* Tablet: 3 columns */
-@media (min-width: 768px) {{
-    .kpi-row-container {{
-        grid-template-columns: repeat(3, 1fr);
-    }}
-}}
-
-/* Desktop: 4 columns */
-@media (min-width: 1024px) {{
-    .kpi-row-container {{
-        grid-template-columns: repeat(4, 1fr);
+@media (max-width: 1200px) {{
+    .kpi-item {{
+        min-width: 150px;
     }}
 }}
 
@@ -372,6 +391,7 @@ h3 {{
         padding: 0 12px;
     }}
     .kpi-item {{
+        min-width: 140px;
         padding: 0.8rem;
     }}
 }}
@@ -387,6 +407,10 @@ h3 {{
         min-width: 120px;
         font-size: 0.75rem;
         padding: 0 8px;
+    }}
+    
+    .kpi-item {{
+        min-width: 130px;
     }}
     
     .kpi-row-container {{
@@ -406,6 +430,7 @@ h3 {{
     }}
     
     .kpi-item {{
+        min-width: 120px;
         padding: 0.6rem;
         height: 100px;
     }}
@@ -866,6 +891,7 @@ moto = vehicule_counts.get('Moto', 0)
 bus = vehicule_counts.get('Bus', 0)
 
 # KPIs alignés horizontalement dans une seule ligne
+st.markdown('<div class="kpi-row-container">', unsafe_allow_html=True)
 
 kpis_horizontal = [
     {'icon': '🚗', 'label': 'Total Accidents', 'color': COLORS['primary'], 'value': f"{total_accidents:,}"},
@@ -877,8 +903,6 @@ kpis_horizontal = [
     {'icon': '🏍️', 'label': 'Motos', 'color': COLORS['moto'], 'value': f"{moto:,}"},
     {'icon': '📊', 'label': 'Taux Mortalité', 'color': COLORS['dark'], 'value': taux_mortalite},
 ]
-# Build HTML content as a list and join for better performance
-html_parts = ['<div class="kpi-row-container">']
 
 for kpi in kpis_horizontal:
     if kpi['label'] != 'Taux Mortalité':
@@ -891,23 +915,16 @@ for kpi in kpis_horizontal:
     else:
         pct_html = ''
     
-    html_parts.append(
-        f'<div class="kpi-item" style="border-top-color: {kpi["color"]};">'
-        f'<span class="kpi-icon">{kpi["icon"]}</span>'
-        f'<div class="kpi-value">{kpi["value"]}</div>'
-        f'<div class="kpi-label">{kpi["label"]}</div>'
-        f'{pct_html}'
-        f'</div>'
-    )
+    st.markdown(f"""
+    <div class="kpi-item" style="border-top-color: {kpi['color']};">
+        <span class="kpi-icon">{kpi['icon']}</span>
+        <div class="kpi-value">{kpi['value']}</div>
+        <div class="kpi-label">{kpi['label']}</div>
+        {pct_html}
+    </div>
+    """, unsafe_allow_html=True)
 
-html_parts.append('</div>')
-final_html_content = ''.join(html_parts)
-
-# Render HTML - try st.html() first (Streamlit 1.28+), fallback to st.markdown()
-if hasattr(st, 'html'):
-    st.html(final_html_content)
-else:
-    st.markdown(final_html_content, unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # =====================================================
 # ONGLETS PRINCIPAUX
